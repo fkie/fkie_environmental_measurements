@@ -18,10 +18,16 @@ Detailed information about usage is provided on each package.
 
 If you want to use all included packages, you can just compile the meta-package [fkie_measurement](https://github.com/fkie/fkie_environmental_measurements/tree/main/fkie_measurement) using [catkin tools](https://catkin-tools.readthedocs.io/en/latest/installing.html):
 
-- Install dependencies:
+- Install APT dependencies:
 
 ```
-sudo apt install ros-noetic-octomap-ros ros-noetic-pcl-ros ros-noetic-grid-map-core ros-noetic-grid-map-ros
+sudo apt install ros-noetic-octomap-ros ros-noetic-pcl-ros ros-noetic-grid-map-core ros-noetic-grid-map-ros python3-sklearn  python3-skimage python3-scipy
+```
+
+- Install Python dependencies:
+
+```
+pip install future pykrige --user
 ```
 
 - Get the code and compile:
@@ -38,6 +44,7 @@ catkin build --this
 A demo using the [measurement_server](https://github.com/fkie/fkie_environmental_measurements/tree/main/fkie_measurement_server) and the [measurement_sensor_simulator](https://github.com/fkie/fkie_measurement/tree/main/fkie_measurement_sensor_simulator) can be execute using:
 
 ```
+cd ros
 source devel/setup.bash
 roslaunch fkie_measurement_server measurement_server.launch
 ```
