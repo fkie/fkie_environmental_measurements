@@ -6,17 +6,17 @@ This repository contains ROS packages for storing environmental measurements usi
 
 ## Package Description
 
-- [fkie_measurement](https://github.com/fkie/fkie_measurement/tree/main/fkie_measurement) Meta-package with the dependencies
-- [fkie_measurement_msgs](https://github.com/fkie/fkie_measurement/tree/main/fkie_measurement_msgs) Definition of generic measurement messages
-- [fkie_measurement_server](https://github.com/fkie/fkie_measurement/tree/main/fkie_measurement_server) Collects and storages measurement data of any number of sensors
-- [fkie_measurement_sensor_simulator](https://github.com/fkie/fkie_measurement/tree/main/fkie_measurement_sensor_simulator) Simulates environmental sources, such as hot-spots or air pollution.
-- [fkie_measurement_tools](https://github.com/fkie/fkie_measurement/tree/main/fkie_measurement_tools) Visualization tools using point clouds and occupancy grids.
+- [fkie_measurement](https://github.com/fkie/fkie_environmental_measurements/tree/main/fkie_measurement) Meta-package with the dependencies
+- [fkie_measurement_msgs](https://github.com/fkie/fkie_environmental_measurements/tree/main/fkie_measurement_msgs) Definition of generic measurement messages
+- [fkie_measurement_server](https://github.com/fkie/fkie_environmental_measurements/tree/main/fkie_measurement_server) Collects and storages measurement data of any number of sensors
+- [fkie_measurement_sensor_simulator](https://github.com/fkie/fkie_environmental_measurements/tree/main/fkie_measurement_sensor_simulator) Simulates environmental sources, such as hot-spots or air pollution.
+- [fkie_measurement_tools](https://github.com/fkie/fkie_environmental_measurements/tree/main/fkie_measurement_tools) Visualization tools using point clouds and occupancy grids.
 
 Detailed information about usage is provided on each package.
 
 ## Compilation
 
-If you want to use all included packages, you can just compile the meta-package [fkie_measurement](https://github.com/fkie/fkie_measurement/tree/main/fkie_measurement) using [catkin tools](https://catkin-tools.readthedocs.io/en/latest/installing.html):
+If you want to use all included packages, you can just compile the meta-package [fkie_measurement](https://github.com/fkie/fkie_environmental_measurements/tree/main/fkie_measurement) using [catkin tools](https://catkin-tools.readthedocs.io/en/latest/installing.html):
 
 - Install dependencies:
 
@@ -28,14 +28,14 @@ sudo apt install ros-noetic-octomap-ros ros-noetic-pcl-ros ros-noetic-grid-map-c
 
 ```
 cd ros/src
-git clone https://github.com/fkie/fkie_measurement
-cd fkie_measurement/fkie_measurement
+git clone https://github.com/fkie/fkie_environmental_measurements
+cd fkie_environmental_measurements/fkie_measurement
 catkin build --this
 ```
 
 ## Usage
 
-A demo using the [measurement_server](https://github.com/fkie/fkie_measurement/tree/main/fkie_measurement_server) and the [measurement_sensor_simulator](https://github.com/fkie/fkie_measurement/tree/main/fkie_measurement_sensor_simulator) can be execute using:
+A demo using the [measurement_server](https://github.com/fkie/fkie_environmental_measurements/tree/main/fkie_measurement_server) and the [measurement_sensor_simulator](https://github.com/fkie/fkie_measurement/tree/main/fkie_measurement_sensor_simulator) can be execute using:
 
 ```
 roslaunch fkie_measurement_server measurement_server.launch
