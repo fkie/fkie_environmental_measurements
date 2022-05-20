@@ -38,6 +38,7 @@ catkin build --this
 A demo using the [measurement_server](https://github.com/fkie/fkie_environmental_measurements/tree/main/fkie_measurement_server) and the [measurement_sensor_simulator](https://github.com/fkie/fkie_measurement/tree/main/fkie_measurement_sensor_simulator) can be execute using:
 
 ```
+source devel/setup.bash
 roslaunch fkie_measurement_server measurement_server.launch
 ```
 
