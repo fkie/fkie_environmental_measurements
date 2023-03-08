@@ -1,53 +1,34 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.5)
 
 project(fkie_measurement_msgs)
 
-find_package(
-  catkin REQUIRED
-  COMPONENTS roscpp
-             rospy
-             std_msgs
-             message_generation
-             message_runtime
-             actionlib_msgs
-             geometry_msgs)
 
-add_action_files(
-  DIRECTORY action
-  FILES 
-    RequestBoundaryPolygons.action 
-    RequestGaussianInterpolation.action
-    ExplorePolygon3D.action
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+find_package(ament_cmake REQUIRED)
+find_package(builtin_interfaces REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(actionlib_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+
+# Generate messages in the 'msg' folder
+rosidl_generate_interfaces(${PROJECT_NAME}
+    action/RequestBoundaryPolygons.action 
+    action/RequestGaussianInterpolation.action
+    action/ExplorePolygon3D.action
+    msg/Measurement.msg
+    msg/MeasurementValue.msg
+    msg/MeasurementLocated.msg
+    msg/MeasurementArray.msg
+    msg/MeasurementGaussianStatistics.msg
+    msg/BoundaryPolygon.msg 
+    msg/MeasurementEstimation.msg
+    msg/MeasurementEstimationValue.msg
+     DEPENDENCIES std_msgs actionlib_msgs geometry_msgs
 )
 
-add_message_files(
-  FILES 
-    Measurement.msg
-    MeasurementValue.msg
-    MeasurementLocated.msg
-    MeasurementArray.msg
-    MeasurementGaussianStatistics.msg
-    BoundaryPolygon.msg 
-    MeasurementEstimation.msg
-    MeasurementEstimationValue.msg)
-
-generate_messages(DEPENDENCIES std_msgs actionlib_msgs geometry_msgs)
-
-catkin_package(
-  INCLUDE_DIRS
-  CATKIN_DEPENDS
-    roscpp
-    rospy
-    std_msgs
-    message_runtime
-    actionlib_msgs
-    geometry_msgs
-)
-
-###########
-## Build ##
-###########
-
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-)
+ament_export_dependencies(rosidl_default_runtime std_msgs)
+ament_package()

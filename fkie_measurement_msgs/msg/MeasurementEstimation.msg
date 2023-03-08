@@ -1,3 +1,3 @@
-Header header
+std_msgs/Header header
 float32 grid_size
 fkie_measurement_msgs/MeasurementEstimationValue[] values

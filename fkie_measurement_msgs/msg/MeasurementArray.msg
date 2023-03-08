@@ -1,7 +1,7 @@
 # header
 #   stamp: Time when this message was generated
 #   frame_id: Ignored
-Header header
+std_msgs/Header header
 
 # Specify if the current arrays contain all measurements or only an update
 bool full_history

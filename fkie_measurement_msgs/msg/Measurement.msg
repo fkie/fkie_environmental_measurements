@@ -1,7 +1,7 @@
 # header:
 #   frame_id: TF frame to which the sensor is attached
 #   stamp: Time when this message was generated
-Header header
+std_msgs/Header header
 
 # Unique ID that identifies the device 
 string unique_serial_id
