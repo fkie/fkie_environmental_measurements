@@ -21,6 +21,7 @@ SensorSimulator::SensorSimulator()
   getROSParameter<std::string>("sensor_frame", sensor_frame);
   getROSParameter<double>("rate", rate);
   getROSParameter<std::string>("topic_measurement", topic_measurement);
+  getROSParameter<std::string>("topic_sensor_array", topic_sensor_array);
   getROSParameter<double>("marker_size", marker_size);
 
   // Measurement properties
@@ -34,6 +35,8 @@ SensorSimulator::SensorSimulator()
   getROSParameter<std::string>("sensor_unit", sensor_unit);
 
   getROSParameter<double>("random_factor", random_factor);
+  getROSParameter<int>("utm_zone_number", utm_zone_number);
+  getROSParameter<std::string>("utm_zone_letter", utm_zone_letter);
 
   if (global_frame.empty() || sensor_frame.empty() || unique_serial_id.empty() || manufacturer_device_name.empty() ||
       device_classification.empty() || sensor_name.empty() || sensor_source_type.empty() || sensor_unit.empty())
@@ -54,6 +57,8 @@ SensorSimulator::SensorSimulator()
   measurement_pub = nh.advertise<fkie_measurement_msgs::Measurement>(topic_measurement, 10, false);
   measurement_array_pub =
       nh.advertise<fkie_measurement_msgs::MeasurementArray>(topic_measurement + "_array", 10, false);
+  sensor_array_pub =
+      nh.advertise<fkie_measurement_msgs::MeasurementArray>(topic_sensor_array, 10, true);
   marker_location_pub = nh.advertise<visualization_msgs::MarkerArray>("sensor_locations", 10, true);
 
   publishSourceLocations();
@@ -65,6 +70,7 @@ SensorSimulator::~SensorSimulator()
 {
   measurement_pub.shutdown();
   measurement_array_pub.shutdown();
+  sensor_array_pub.shutdown();
   marker_location_pub.shutdown();
 }
 
@@ -180,6 +186,8 @@ void SensorSimulator::publishMeasurement(const double measurement) const
   fkie_measurement_msgs::MeasurementLocated m_located;
   m_located.measurement = m;
   m_located.pose = current_sensor_position.toPoseStamped(global_frame);
+  m_located.utm_zone_number = utm_zone_number;
+  m_located.utm_zone_letter = utm_zone_letter;
 
   fkie_measurement_msgs::MeasurementArray m_array;
   m_array.header.stamp = ros::Time::now();
@@ -204,6 +212,10 @@ void SensorSimulator::publishSourceLocations()
   m.scale.z = marker_size;
   m.lifetime = ros::Duration(0);
   m.pose.orientation.w = 1.0;
+
+  fkie_measurement_msgs::MeasurementArray m_array;
+  m_array.header.stamp = ros::Time::now();
+  m_array.full_history = true;
 
   int counter_id = 1;
   for (SourceDescription s : sources)
@@ -261,12 +273,43 @@ void SensorSimulator::publishSourceLocations()
 
     m_line.color = s.color_text;
     marker_locations.markers.push_back(m_line);
+
+    // create measurement array
+    fkie_measurement_msgs::MeasurementLocated m_located;
+    m_located.measurement.header.frame_id = global_frame;
+    m_located.measurement.header.stamp = ros::Time::now();
+    // Unique ID that identifies the device
+    m_located.measurement.unique_serial_id = s.name;
+    // Generic name assigned by the device manufacturer
+    m_located.measurement.manufacturer_device_name = s.name;
+    // classification that groups what the device is able to measure:
+    //   e.g. chemical (C), biological (B), radiological (R), meteorologic (M), (W) WiFi etc...
+    m_located.measurement.device_classification = device_classification;
+
+    fkie_measurement_msgs::MeasurementValue v;
+    v.header.stamp = ros::Time::now();
+    v.sensor = s.name;
+    v.source_type = sensor_source_type;
+    v.unit = sensor_unit;
+    v.value_single = s.intensity;
+    m_located.measurement.values.push_back(v);
+
+    // publish measurement array
+    m_located.pose.header.frame_id = global_frame;
+    m_located.pose.header.stamp = ros::Time::now();
+    m_located.pose.pose.position.x = s.position.x;
+    m_located.pose.pose.position.y = s.position.y;
+    m_located.pose.pose.position.z = s.position.z + marker_size;
+    m_located.utm_zone_number = utm_zone_number;
+    m_located.utm_zone_letter = utm_zone_letter;
+    m_array.located_measurements.push_back(m_located);
   }
   marker_locations.markers.push_back(m);
   marker_location_pub.publish(marker_locations);
+  sensor_array_pub.publish(m_array);
 }
 
-double SensorSimulator::euclideanDistance(const PositionGrid& p1, const PositionGrid& p2) const
+double SensorSimulator::euclideanDistance(const PositionGrid &p1, const PositionGrid &p2) const
 {
   return std::sqrt(std::pow(p1.x - p2.x, 2) + std::pow(p1.y - p2.y, 2) + std::pow(p1.z - p2.z, 2));
 }

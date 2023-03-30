@@ -33,8 +33,11 @@ public:
   std::string global_frame = "";
   std::string sensor_frame = "";
   std::string topic_measurement = "measurement";
+  std::string topic_sensor_array = "sensor_array";
   double rate = 1.0;
   double marker_size = 0.2;
+  int utm_zone_number = 0;
+  std::string utm_zone_letter = "";
 
   // measurement properties
   std::string unique_serial_id = "";
@@ -52,6 +55,7 @@ protected:
   tf::StampedTransform tf_world_sensor;
   ros::Publisher measurement_pub;
   ros::Publisher measurement_array_pub;
+  ros::Publisher sensor_array_pub;
   ros::Publisher marker_location_pub;
   visualization_msgs::MarkerArray marker_locations;
 
@@ -90,13 +94,13 @@ public:
   /**
    * @brief Computes euler distance between points [p1] and [p2]
    */
-  double euclideanDistance(const PositionGrid& p1, const PositionGrid& p2) const;
+  double euclideanDistance(const PositionGrid &p1, const PositionGrid &p2) const;
 
   /**
    * @brief Read a ROS parameter
    */
   template <typename T>
-  inline bool getROSParameter(std::string name, T& param, bool print = true)
+  inline bool getROSParameter(std::string name, T &param, bool print = true)
   {
     const T default_value = param;
     bool r = ros::NodeHandle("~").param<T>(name, param, default_value);
