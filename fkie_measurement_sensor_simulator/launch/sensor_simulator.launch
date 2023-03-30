@@ -20,6 +20,7 @@
     <param name="sensor_name" value="sensor_1"/>
     <param name="sensor_source_type" value="temperature"/>
     <param name="sensor_unit" value="C"/>
+    <param name="random_factor" value="0.01"/>
   </node>
 
   <node name="tf_world_sensor_frame" pkg="tf2_ros" type="static_transform_publisher" args="1.0 0.5 0.6 0 0 0 $(arg global_frame) $(arg sensor_frame)">

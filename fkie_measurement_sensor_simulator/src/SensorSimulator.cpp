@@ -33,6 +33,8 @@ SensorSimulator::SensorSimulator()
   getROSParameter<std::string>("sensor_source_type", sensor_source_type);
   getROSParameter<std::string>("sensor_unit", sensor_unit);
 
+  getROSParameter<double>("random_factor", random_factor);
+
   if (global_frame.empty() || sensor_frame.empty() || unique_serial_id.empty() || manufacturer_device_name.empty() ||
       device_classification.empty() || sensor_name.empty() || sensor_source_type.empty() || sensor_unit.empty())
   {
@@ -110,6 +112,10 @@ void SensorSimulator::updateCurrentSensorPosition()
 
 double SensorSimulator::computeMeasurementFromSources() const
 {
+  float rfactor = 0.0;
+  if (random_factor != 0.0) {
+    rfactor = static_cast <float> (rand()) / static_cast <float> (RAND_MAX / random_factor);
+  }
   double accumulated_intensity = 0.0;
 
   for (SourceDescription s : sources)
@@ -136,7 +142,7 @@ double SensorSimulator::computeMeasurementFromSources() const
     accumulated_intensity += m;
   }
 
-  return accumulated_intensity;
+  return accumulated_intensity + accumulated_intensity * rfactor;
 }
 
 void SensorSimulator::publishMeasurement(const double measurement) const

@@ -45,6 +45,7 @@ public:
   std::string sensor_name = "";
   std::string sensor_source_type = "";
   std::string sensor_unit = "";
+  double random_factor = 0.1;
 
 protected:
   tf::TransformListener tf_listener;
