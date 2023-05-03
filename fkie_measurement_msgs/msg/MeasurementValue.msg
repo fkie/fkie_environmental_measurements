@@ -1,7 +1,7 @@
-# header:
-#   frame_id: ignored
-#   stamp: Time when the value was measured
-std_msgs/Header header
+# start: Time when the measurement was started
+time start
+# end: Time when the value was measured
+time end
 
 # Name or internal ID of the sensor (commonly used when a single device contains multiple sensors)
 string sensor
