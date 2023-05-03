@@ -122,7 +122,7 @@ class MeasurementPublisher(with_metaclass(Singleton, object)):
                         if publish_measurement_array:
                             # create measurement value message
                             measurement_value = MeasurementValue()
-                            measurement_value.start = stamp
+                            measurement_value.begin = stamp
                             measurement_value.end = stamp
                             measurement_value.sensor = m_type
                             measurement_value.source_type = m_type

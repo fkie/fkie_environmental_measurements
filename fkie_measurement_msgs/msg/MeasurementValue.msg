@@ -1,5 +1,5 @@
-# start: Time when the measurement was started
-time start
+# begin: Time when the measurement was started
+time begin
 # end: Time when the value was measured
 time end
 
