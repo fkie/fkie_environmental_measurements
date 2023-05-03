@@ -172,7 +172,8 @@ void SensorSimulator::publishMeasurement(const double measurement) const
   m.device_classification = device_classification;
 
   fkie_measurement_msgs::MeasurementValue v;
-  v.header.stamp = ros::Time::now();
+  v.start = ros::Time::now();
+  v.end = v.start;
   v.sensor = sensor_name;
   v.source_type = sensor_source_type;
   v.unit = sensor_unit;
@@ -287,7 +288,8 @@ void SensorSimulator::publishSourceLocations()
     m_located.measurement.device_classification = device_classification;
 
     fkie_measurement_msgs::MeasurementValue v;
-    v.header.stamp = ros::Time::now();
+    v.start = ros::Time::now();
+    v.end = v.start;
     v.sensor = s.name;
     v.source_type = sensor_source_type;
     v.unit = sensor_unit;
