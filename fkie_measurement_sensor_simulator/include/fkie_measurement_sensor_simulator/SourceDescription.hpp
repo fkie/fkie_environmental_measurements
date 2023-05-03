@@ -64,6 +64,7 @@ public:
       private_node.param<double>(param_name + "/exponential_decay_rate", sd.exponential_decay_rate, 0.0);
 
       private_node.param<std::vector<float>>(param_name + "/color_rgba", color_rgba, std::vector<float>());
+      private_node.param<double>(param_name + "/z", sd.position.z, 0.0);
       if (color_rgba.size() > 0)
       {
         sd.color.r = color_rgba[0];
