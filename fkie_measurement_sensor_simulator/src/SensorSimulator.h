@@ -33,6 +33,7 @@ public:
   std::string global_frame = "";
   std::string sensor_frame = "";
   std::string topic_measurement = "measurement";
+  std::string topic_measurement_array = "measurement_array";
   std::string topic_sensor_array = "sensor_array";
   double rate = 1.0;
   double marker_size = 0.2;

@@ -21,6 +21,7 @@ SensorSimulator::SensorSimulator()
   getROSParameter<std::string>("sensor_frame", sensor_frame);
   getROSParameter<double>("rate", rate);
   getROSParameter<std::string>("topic_measurement", topic_measurement);
+  getROSParameter<std::string>("topic_measurement_array", topic_measurement_array);
   getROSParameter<std::string>("topic_sensor_array", topic_sensor_array);
   getROSParameter<double>("marker_size", marker_size);
 
@@ -56,7 +57,7 @@ SensorSimulator::SensorSimulator()
   ros::NodeHandle nh = ros::NodeHandle("");
   measurement_pub = nh.advertise<fkie_measurement_msgs::Measurement>(topic_measurement, 10, false);
   measurement_array_pub =
-      nh.advertise<fkie_measurement_msgs::MeasurementArray>(topic_measurement + "_array", 10, false);
+      nh.advertise<fkie_measurement_msgs::MeasurementArray>(topic_measurement_array, 10, false);
   sensor_array_pub =
       nh.advertise<fkie_measurement_msgs::MeasurementArray>(topic_sensor_array, 10, true);
   marker_location_pub = nh.advertise<visualization_msgs::MarkerArray>("sensor_locations", 10, true);
