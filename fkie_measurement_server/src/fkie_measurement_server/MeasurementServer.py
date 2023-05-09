@@ -156,7 +156,7 @@ class MeasurementServer(with_metaclass(Singleton, object)):
         for msg_value in msg.values:
             if not self.add_measurement(msg_value.source_type,
                                         msg_value.unit,
-                                        msg_value.header.stamp,
+                                        msg_value.end,
                                         self.params.global_frame,
                                         msg_position,
                                         msg_value.value_text or msg_value.value_array or msg_value.value_single):
@@ -180,7 +180,7 @@ class MeasurementServer(with_metaclass(Singleton, object)):
         for msg_value in msg.values:
             if not self.add_measurement(msg_value.source_type,
                                         msg_value.unit,
-                                        msg_value.header.stamp,
+                                        msg_value.end,
                                         msg.pose.header.frame_id,
                                         msg_position,
                                         msg_value.value_text or msg_value.value_array or msg_value.value_single):
