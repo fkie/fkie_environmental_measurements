@@ -35,4 +35,5 @@ catkin_package(
 catkin_install_python(
   PROGRAMS 
     nodes/measurement_server_node.py
+    nodes/simple_collector_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
