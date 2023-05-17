@@ -50,6 +50,11 @@ public:
   std::string sensor_source_type = "";
   std::string sensor_unit = "";
   double random_factor = 0.1;
+  double random_pos_factor = 0.0;
+  double xpos = 0;
+  double ypos = 0;
+  double xdir = 1.0;
+  double ydir = 1.0;
 
 protected:
   tf::TransformListener tf_listener;

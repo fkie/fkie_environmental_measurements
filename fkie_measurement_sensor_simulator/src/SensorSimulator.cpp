@@ -36,6 +36,7 @@ SensorSimulator::SensorSimulator()
   getROSParameter<std::string>("sensor_unit", sensor_unit);
 
   getROSParameter<double>("random_factor", random_factor);
+  getROSParameter<double>("random_pos_factor", random_pos_factor);
   getROSParameter<int>("utm_zone_number", utm_zone_number);
   getROSParameter<std::string>("utm_zone_letter", utm_zone_letter);
 
@@ -109,8 +110,22 @@ void SensorSimulator::updateCurrentSensorPosition()
 
   // convert point to world frame
   tf::Stamped<tf::Point> pout_test, pin_test;
-  pin_test.setX(0);
-  pin_test.setY(0);
+  if (random_pos_factor != 0.0) {
+    float rfactor = static_cast <float> (rand()) / static_cast <float> (RAND_MAX / random_pos_factor);
+    xpos += rfactor * xdir;
+    if (rfactor < random_pos_factor / 10.0) {
+      xdir *= -1.0;
+    }
+  }
+  pin_test.setX(xpos);
+  if (random_pos_factor != 0.0) {
+    float rfactor = static_cast <float> (rand()) / static_cast <float> (RAND_MAX / random_pos_factor);
+    ypos += rfactor * ydir;
+    if (rfactor < random_pos_factor / 10.0) {
+      ydir *= -1.0;
+    }
+  }
+  pin_test.setY(ypos);
   pin_test.setZ(0);
   pout_test.setData(tf_world_sensor * pin_test);
 
