@@ -19,7 +19,7 @@ from typing import Dict
 from typing import Set
 
 import rospy
-# import tf2_ros
+import tf2_ros
 import threading
 
 from std_msgs.msg import Int32
@@ -39,11 +39,14 @@ class MeasurementCollectorNode(rospy.SubscribeListener):
         rospy.loginfo(
             f"  topic_sub_measurement_array: {self.param_topic_sub_measurement_array}")
 
+        self.global_frame = rospy.get_param('~frame_global', "map")
+        rospy.loginfo(f"  frame_global: {self.global_frame}")
+
         # unique_serial_id: MeasurementArray with full_history
         self.sensor_histories: Dict[str, MeasurementArray] = {}
 
-        # self.tf_buffer = tf2_ros.Buffer()
-        # self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
+        self.tf_buffer = tf2_ros.Buffer()
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
 
         # create subscribers for all registered sensors
         self.pub_measurement_array = rospy.Publisher(
@@ -68,22 +71,35 @@ class MeasurementCollectorNode(rospy.SubscribeListener):
             rospy.logerr("[callback_measurement] empty [unique_serial_id].")
             return
 
-        if msg.unique_serial_id not in self.sensor_histories:
+        if msg.measurement.unique_serial_id not in self.sensor_histories:
             ma = MeasurementArray()
             ma.full_history = True
-            self.sensor_histories[msg.unique_serial_id] = ma
+            self.sensor_histories[msg.measurement.unique_serial_id] = ma
 
-        s_history: MeasurementArray = self.sensor_histories[msg.unique_serial_id]
-        s_history.measurements.append(msg)
+        s_history: MeasurementArray = self.sensor_histories[msg.measurement.unique_serial_id]
 
-        # try:
-        #     trans = self.tf_buffer.lookup_transform(
-        #         self.params.global_frame, sensor_frame_id, rospy.Time())
-        # except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
-        #     rospy.logwarn("[callback_measurement] Could not find TF2 lookup between frames [{0}] and [{1}]".format(
-        #         self.params.global_frame, sensor_frame_id
-        #     ))
-        #     return
+        msgl = MeasurementLocated()
+        msgl.measurement = msg
+        msgl.pose.header.frame_id = self.sensor_frame
+        msgl.pose.header.stamp = msg.header.stamp
+
+        try:
+            trans = self.tf_buffer.lookup_transform(
+                self.global_frame, msg.header.frame_id, rospy.Time())
+            # get current position
+            msgl.pose.pose.position.x = trans[0]
+            msgl.pose.pose.position.y = trans[1]
+            msgl.pose.pose.position.z = trans[2]
+            s_history.located_measurements.append(msg)
+        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+            rospy.logwarn("[callback_measurement] Could not find TF2 lookup between frames [{0}] and [{1}]".format(
+                self.global_frame, msg.header.frame_id
+            ))
+            return
+        msga = MeasurementArray()
+        msga.full_history = False
+        msga.located_measurements.append(msgl)
+        self.pub_measurement_array.publish(msga)
 
     def callback_measurement_located(self, msg):
         # type: (MeasurementLocated) -> None
@@ -99,6 +115,11 @@ class MeasurementCollectorNode(rospy.SubscribeListener):
 
         s_history: MeasurementArray = self.sensor_histories[msg.measurement.unique_serial_id]
         s_history.located_measurements.append(msg)
+
+        msga = MeasurementArray()
+        msga.full_history = False
+        msga.located_measurements.append(msg)
+        self.pub_measurement_array.publish(msga)
 
     def callback_measurement_array(self, msg):
         # clear if this message has full history
