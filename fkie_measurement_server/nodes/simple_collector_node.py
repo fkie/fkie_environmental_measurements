@@ -71,26 +71,26 @@ class MeasurementCollectorNode(rospy.SubscribeListener):
             rospy.logerr("[callback_measurement] empty [unique_serial_id].")
             return
 
-        if msg.measurement.unique_serial_id not in self.sensor_histories:
+        if msg.unique_serial_id not in self.sensor_histories:
             ma = MeasurementArray()
             ma.full_history = True
-            self.sensor_histories[msg.measurement.unique_serial_id] = ma
+            self.sensor_histories[msg.unique_serial_id] = ma
 
-        s_history: MeasurementArray = self.sensor_histories[msg.measurement.unique_serial_id]
+        s_history: MeasurementArray = self.sensor_histories[msg.unique_serial_id]
 
         msgl = MeasurementLocated()
         msgl.measurement = msg
-        msgl.pose.header.frame_id = self.sensor_frame
-        msgl.pose.header.stamp = msg.header.stamp
 
         try:
             trans = self.tf_buffer.lookup_transform(
                 self.global_frame, msg.header.frame_id, rospy.Time())
             # get current position
-            msgl.pose.pose.position.x = trans[0]
-            msgl.pose.pose.position.y = trans[1]
-            msgl.pose.pose.position.z = trans[2]
-            s_history.located_measurements.append(msg)
+            msgl.pose.pose.position.x = trans.transform.translation.x
+            msgl.pose.pose.position.y = trans.transform.translation.y
+            msgl.pose.pose.position.z = trans.transform.translation.z
+            msgl.pose.header.frame_id = trans.header.frame_id
+            msgl.pose.header.stamp = trans.header.stamp
+            s_history.located_measurements.append(msgl)
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
             rospy.logwarn("[callback_measurement] Could not find TF2 lookup between frames [{0}] and [{1}]".format(
                 self.global_frame, msg.header.frame_id
