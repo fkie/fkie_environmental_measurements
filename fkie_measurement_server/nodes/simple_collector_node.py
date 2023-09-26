@@ -42,6 +42,11 @@ class MeasurementCollectorNode(rospy.SubscribeListener):
         self.global_frame = rospy.get_param('~frame_global', "map")
         rospy.loginfo(f"  frame_global: {self.global_frame}")
 
+        self.utm_zone_number = rospy.get_param('~utm_zone_number', "")
+        rospy.loginfo(f"  utm_zone_number: {self.utm_zone_number}")
+        self.utm_zone_letter = rospy.get_param('~utm_zone_letter', "")
+        rospy.loginfo(f"  utm_zone_letter: {self.utm_zone_letter}")
+
         # unique_serial_id: MeasurementArray with full_history
         self.sensor_histories: Dict[str, MeasurementArray] = {}
 
@@ -91,6 +96,9 @@ class MeasurementCollectorNode(rospy.SubscribeListener):
             msgl.pose.header.frame_id = trans.header.frame_id
             msgl.pose.header.stamp = trans.header.stamp
             s_history.located_measurements.append(msgl)
+            if self.utm_zone_number and self.utm_zone_letter:
+                msgl.utm_zone_number = self.utm_zone_number
+                msgl.utm_zone_letter = self.utm_zone_letter
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
             rospy.logwarn("[callback_measurement] Could not find TF2 lookup between frames [{0}] and [{1}]".format(
                 self.global_frame, msg.header.frame_id
