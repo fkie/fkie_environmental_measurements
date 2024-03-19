@@ -1,7 +1,7 @@
 # begin: Time when the measurement was started
-time begin
+builtin_interfaces/Time begin
 # end: Time when the value was measured
-time end
+builtin_interfaces/Time end
 
 # Name or internal ID of the sensor (commonly used when a single device contains multiple sensors)
 string sensor

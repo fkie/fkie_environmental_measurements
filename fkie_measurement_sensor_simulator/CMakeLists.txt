@@ -1,52 +1,64 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.5)
 project(fkie_measurement_sensor_simulator)
+#---- Enable C++17 ----
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  fkie_measurement_msgs
-  tf2_ros
-  tf
-)
+if(MSVC)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+else()
+    add_definitions(-Wpedantic)
+endif()
 
-catkin_package(
-  INCLUDE_DIRS 
-    include
-  CATKIN_DEPENDS 
-    roscpp
-    tf
-    tf2_ros
-    fkie_measurement_msgs
-)
+# Update the policy setting to avoid an error when loading the ament_cmake package
+# at the current cmake version level
+if(POLICY CMP0057)
+    cmake_policy(SET CMP0057 NEW)
+endif()
 
-###########
-## Build ##
-###########
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(visualization_msgs REQUIRED)
+find_package(fkie_measurement_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
 
-include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_executable(SensorSimulatorNode 
-  src/SensorSimulator.cpp
-  src/SensorSimulatorNode.cpp)
 
-target_link_libraries(SensorSimulatorNode ${catkin_LIBRARIES}
-                      ${Boost_LIBRARIES} -ltbb)
-                      
-add_dependencies(SensorSimulatorNode ${${PROJECT_NAME}_generate_messages_cpp}
-                 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_definitions( -DUSING_ROS2 )
 
-#############
-## Install ##
-#############
+set(DEPS
+        fkie_measurement_msgs
+        visualization_msgs
+        geometry_msgs
+        tf2_ros
+        rclcpp
+    )
 
-install(DIRECTORY launch/
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
+include_directories(include)
 
-install(DIRECTORY include/${PROJECT_NAME}/
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+add_executable(sensor-simulator
+        src/SensorSimulator.cpp
+        src/SensorSimulatorNode.cpp
+    )
+ament_target_dependencies(sensor-simulator ${DEPS})
+
+if(MSVC)
+else()
+    target_compile_options(sensor-simulator PRIVATE
+        -Wall -Wextra -Werror=return-type)
+endif()
+
+ament_export_libraries(${PROJECT_NAME})
+ament_package()
+install(TARGETS
+    sensor-simulator
+    DESTINATION lib/${PROJECT_NAME})
 
 install(
-  TARGETS 
-    SensorSimulatorNode
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+    DIRECTORY
+    launch
+    config
+    DESTINATION share/${PROJECT_NAME}
+)

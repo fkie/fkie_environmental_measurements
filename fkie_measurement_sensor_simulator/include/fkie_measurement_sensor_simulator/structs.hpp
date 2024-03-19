@@ -22,8 +22,13 @@
 #include <string>
 #include <unordered_map>
 
-#include <tf/transform_datatypes.h>
-#include <tf/transform_listener.h>
+#include "rclcpp/rclcpp.hpp"
+#include <tf2/transform_datatypes.h>
+#include <tf2_ros/transform_listener.h>
+#include "geometry_msgs/msg/pose_stamped.hpp"
+
+//#include <tf2/transform_datatypes.h>
+//#include <tf2_ros/transform_listener.h>
 
 typedef std::string vertex_t;  // represent the unique hash string id of a vertex in the graph
 
@@ -142,10 +147,10 @@ struct PositionGrid
     return std::string("x: " + std::to_string(x) + " y: " + std::to_string(y) + " z: " + std::to_string(z));
   }
 
-  geometry_msgs::PoseStamped toPoseStamped(const std::string frame_id) const
+  geometry_msgs::msg::PoseStamped toPoseStamped(const std::string& frame_id) const
   {
-    geometry_msgs::PoseStamped p;
-    p.header.stamp = ros::Time::now();
+    geometry_msgs::msg::PoseStamped p;
+    p.header.stamp = rclcpp::Clock().now();
     p.header.frame_id = frame_id;
     p.pose.position.x = x;
     p.pose.position.y = y;
@@ -179,7 +184,7 @@ struct ValueData
 struct MeasurementData
 {
   PositionGrid position;
-  ros::Time stamp;
+  rclcpp::Time stamp;
   std::vector<ValueData> values;
 };
 

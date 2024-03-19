@@ -1,4 +1,4 @@
-// Copyright 2022 Fraunhofer FKIE - All Rights Reserved
+// Copyright 2024 Fraunhofer FKIE - All Rights Reserved
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@
 #include <string>
 #include <algorithm>
 
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 
 #include "fkie_measurement_sensor_simulator/structs.hpp"
 
@@ -36,60 +36,81 @@ public:
 
   double linear_alpha;
   double exponential_decay_rate;
-  std_msgs::ColorRGBA color;
-  std_msgs::ColorRGBA color_text;
+  std_msgs::msg::ColorRGBA color;
+  std_msgs::msg::ColorRGBA color_text;
 
   SourceDescription(){};
 
-  [[nodiscard]] static bool updateSourceDescriptions(std::vector<SourceDescription>& sources)
+  [[nodiscard]] static bool updateSourceDescriptions(rclcpp::Node::SharedPtr node, std::vector<SourceDescription> &sources)
   {
     sources.clear();
-    ros::NodeHandle private_node = ros::NodeHandle("~");
-
     int counter = 0;
-    std::string param_name = "sources/source_" + std::to_string(counter);
-
-    while (private_node.hasParam(param_name + "/name"))
+    for (int i = 0; i < 1; i++)//4
     {
+      std::string param_name = "sources/source_" + std::to_string(i);
+      RCLCPP_WARN_STREAM(node->get_logger(), "param_name: " << param_name);
       SourceDescription sd;
-      std::vector<float> color_rgba;
-      private_node.param<std::string>(param_name + "/name", sd.name, std::string(""));
-      private_node.param<double>(param_name + "/intensity", sd.intensity, 0.0);
-      private_node.param<double>(param_name + "/x", sd.position.x, 0.0);
-      private_node.param<double>(param_name + "/y", sd.position.y, 0.0);
-      private_node.param<double>(param_name + "/z", sd.position.z, 0.0);
+      std::vector<double> color_rgba;
+      bool valid = false;
+      node->declare_parameter(param_name + "/valid", valid);
+      valid = node->get_parameter(param_name + "/valid").as_bool();
+      
 
-      private_node.param<std::string>(param_name + "/function", sd.function, std::string(""));
-      private_node.param<double>(param_name + "/linear_alpha", sd.linear_alpha, 0.0);
-      private_node.param<double>(param_name + "/exponential_decay_rate", sd.exponential_decay_rate, 0.0);
+      node->declare_parameter(param_name + "/name", sd.name);
+      node->declare_parameter(param_name + "/intensity", sd.intensity);
+      node->declare_parameter(param_name + "/x", sd.position.x);
+      node->declare_parameter(param_name + "/y", sd.position.y);
+      node->declare_parameter(param_name + "/z", sd.position.z);
 
-      private_node.param<std::vector<float>>(param_name + "/color_rgba", color_rgba, std::vector<float>());
-      if (color_rgba.size() > 0)
+      node->declare_parameter(param_name + "/function", sd.function);
+      node->declare_parameter(param_name + "/linear_alpha", sd.linear_alpha);
+      node->declare_parameter(param_name + "/exponential_decay_rate", sd.exponential_decay_rate);
+
+      node->declare_parameter<std::vector<double>>(param_name + "/color_rgba", color_rgba);
+
+      // Simulator properties
+      sd.name = node->get_parameter(param_name + "/name").as_string();
+      sd.intensity = node->get_parameter(param_name + "/intensity").as_double();
+      sd.position.x = node->get_parameter(param_name + "/x").as_double();
+      sd.position.y = node->get_parameter(param_name + "/y").as_double();
+      sd.position.z = node->get_parameter(param_name + "/z").as_double();
+
+      sd.function = node->get_parameter(param_name + "/function").as_string();
+      sd.linear_alpha = node->get_parameter(param_name + "/linear_alpha").as_double();
+      sd.exponential_decay_rate = node->get_parameter(param_name + "/exponential_decay_rate").as_double();
+
+      color_rgba = node->get_parameter(param_name + "/color_rgba").as_double_array();
+      if (valid)
       {
-        sd.color.r = color_rgba[0];
-        sd.color.g = color_rgba[1];
-        sd.color.b = color_rgba[2];
-        sd.color.a = color_rgba[3];
-      }
+        if (color_rgba.size() > 0)
+        {
+          sd.color.r = color_rgba[0];
+          sd.color.g = color_rgba[1];
+          sd.color.b = color_rgba[2];
+          sd.color.a = color_rgba[3];
+        }
 
-      private_node.param<std::vector<float>>(param_name + "/text_color_rgba", color_rgba, std::vector<float>());
-      if (color_rgba.size() > 0)
-      {
-        sd.color_text.r = color_rgba[0];
-        sd.color_text.g = color_rgba[1];
-        sd.color_text.b = color_rgba[2];
-        sd.color_text.a = color_rgba[3];
-      }
+        node->declare_parameter(param_name + "/text_color_rgba", color_rgba);
+        color_rgba = node->get_parameter(param_name + "/text_color_rgba").as_double_array();
 
-      sources.push_back(sd);
-      counter++;
-      param_name = "sources/source_" + std::to_string(counter);
+
+        if (color_rgba.size() > 0)
+        {
+          sd.color_text.r = color_rgba[0];
+          sd.color_text.g = color_rgba[1];
+          sd.color_text.b = color_rgba[2];
+          sd.color_text.a = color_rgba[3];
+        }
+
+        sources.push_back(sd);
+        counter++;
+      }
     }
 
-    if (counter == 0)  // no parameters were found
+    if (counter == 0) // no parameters were found
       return false;
 
-    ROS_INFO_STREAM("Total sources: " << sources.size());
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "Total sources: " << sources.size());
 
     return true;
   }

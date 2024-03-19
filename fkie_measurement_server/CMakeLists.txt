@@ -1,38 +1,26 @@
-cmake_minimum_required(VERSION 3.0.2)
-
+cmake_minimum_required(VERSION 3.5)
 project(fkie_measurement_server)
 
-find_package(
-  catkin REQUIRED
-  COMPONENTS 
-    roscpp
-    rospy
-    std_msgs
-    tf
-    tf2_ros
-    fkie_measurement_msgs
-    actionlib_msgs
-    geometry_msgs
-  )
+find_package(ament_cmake QUIET)
 
-catkin_python_setup()
+if(POLICY CMP0057)
+    cmake_policy(SET CMP0057 NEW)
+endif()
 
-catkin_package(
-  CATKIN_DEPENDS
-    roscpp
-    rospy
-    std_msgs
-    fkie_measurement_msgs
-    actionlib_msgs
-    geometry_msgs
-    tf
+
+find_package(ament_cmake_python REQUIRED)
+find_package(rclpy REQUIRED)
+
+
+# Install Python modules
+ament_python_install_package(${PROJECT_NAME})
+
+ament_package()
+
+# Install Python executables
+install(PROGRAMS
+nodes/measurement_server_node.py
+nodes/simple_collector_node.py
+DESTINATION lib/${PROJECT_NAME}
 )
 
-# ##########
-# Install ##
-# ##########
-
-catkin_install_python(
-  PROGRAMS 
-    nodes/measurement_server_node.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

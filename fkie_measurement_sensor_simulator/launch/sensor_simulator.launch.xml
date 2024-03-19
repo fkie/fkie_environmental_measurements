@@ -1,0 +1,44 @@
+<launch>
+  <arg name="global_frame" default="world"/>
+  <arg name="sensor_frame" default="sensor_frame"/>
+
+  <node name="sensor_simulator" pkg="fkie_measurement_sensor_simulator" exec="sensor-simulator">
+    <param name="capability_group" value="sensor_simulator"/>
+
+    <param from="$(find-pkg-share fkie_measurement_sensor_simulator)/config/sensor_simulator_config.yaml" />
+    <param name="sources/source_0/valid" value="true"/>
+    <param name="sources/source_0/name" value="hot-spot 1"/>
+    <param name="sources/source_0/intensity" value="10.0"/>
+    <param name="sources/source_0/x" value="1.0"/>
+    <param name="sources/source_0/y" value="1.0"/>
+    <param name="sources/source_0/z" value="1.0"/>  
+    <param name="sources/source_0/function" value="linear"/>  
+    <param name="sources/source_0/color_rgba" value="[0.0, 0.7, 0.0, 0.8]"/>  
+    <param name="sources/source_0/text_color_rgba" value="[0.8, 0.8, 0.8, 0.8]"/>  
+    
+    
+    <param name="global_frame" value="$(var global_frame)"/>
+    <param name="sensor_frame" value="$(var sensor_frame)"/>
+    <param name="rate" value="2.0"/>
+    <param name="marker_size" value="0.4"/>
+    <param name="topic_measurement" value="measurement"/>
+
+    <param name="unique_serial_id" value="ASD-123"/>
+    <param name="manufacturer_device_name" value="Dummy Thermometer Device"/>
+    <param name="device_classification" value="M"/>
+
+    <param name="sensor_name" value="sensor_1"/>
+    <param name="sensor_source_type" value="temperature"/>
+    <param name="sensor_unit" value="C"/>
+  </node>
+
+  <node name="tf_world_sensor_frame" pkg="tf2_ros" exec="static_transform_publisher" args="1.0 0.5 0.6 0 0 0 $(var global_frame) $(var sensor_frame)">
+    <param name="capability_group" value="sensor_simulator"/>
+  </node>
+
+  <!--<node name="rviz_sensor_simulator" pkg="rviz2" exec="rviz2" output="screen" args="-d $(find-pkg-share fkie_measurement_sensor_simulator)/config/sensor_simulator.rviz">
+    <param name="capability_group" value="sensor_simulator"/>
+    <param name="kill_on_stop" value="300"/>
+  </node>-->
+
+</launch>

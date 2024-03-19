@@ -1,4 +1,4 @@
-// Copyright 2022 Fraunhofer FKIE - All Rights Reserved
+// Copyright 2024 Fraunhofer FKIE - All Rights Reserved
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
 
 #include "SensorSimulator.h"
 
+
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "SensorSimulator");
+  rclcpp::init(argc, argv);
   SensorSimulator ss;
   return 0;
 }
