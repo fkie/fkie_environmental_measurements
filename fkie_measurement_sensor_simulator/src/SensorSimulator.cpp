@@ -153,7 +153,7 @@ void SensorSimulator::updateCurrentSensorPosition()
       yDir *= -1.0;
     }
   }
-  current_sensor_position = PositionGrid(tf_world_sensor.transform.translation.x + xDir, tf_world_sensor.transform.translation.y + yDir, tf_world_sensor.transform.translation.z);
+  current_sensor_position = PositionGrid(tf_world_sensor.transform.translation.x + xPos, tf_world_sensor.transform.translation.y + yPos, tf_world_sensor.transform.translation.z);
 }
 
 double SensorSimulator::computeMeasurementFromSources() const
@@ -208,7 +208,8 @@ void SensorSimulator::publishMeasurement(const double measurement) const
   m.device_classification = device_classification;
 
   fkie_measurement_msgs::msg::MeasurementValue v;
-  // v.header.stamp = rclcpp::Clock().now();
+  v.begin = rclcpp::Clock().now();
+  v.end = rclcpp::Clock().now();
   v.sensor = sensor_name;
   v.source_type = sensor_source_type;
   v.unit = sensor_unit;
@@ -222,6 +223,8 @@ void SensorSimulator::publishMeasurement(const double measurement) const
   fkie_measurement_msgs::msg::MeasurementLocated m_located;
   m_located.measurement = m;
   m_located.pose = current_sensor_position.toPoseStamped(global_frame);
+  m_located.utm_zone_number = utm_zone_number;
+  m_located.utm_zone_letter = utm_zone_letter;
 
   fkie_measurement_msgs::msg::MeasurementArray m_array;
   m_array.header.stamp = rclcpp::Clock().now();
