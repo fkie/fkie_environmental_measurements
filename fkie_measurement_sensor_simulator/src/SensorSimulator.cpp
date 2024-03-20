@@ -16,7 +16,7 @@
 
 SensorSimulator::SensorSimulator()
 {
-  node = std::make_shared<rclcpp::Node>("sensor_simulator");
+  node = std::make_shared<rclcpp::Node>("sensor_simulator", rclcpp::NodeOptions().allow_undeclared_parameters(false));
   p_tf_buffer = std::make_unique<tf2_ros::Buffer>(node->get_clock());
   tf_listener = std::make_shared<tf2_ros::TransformListener>(*p_tf_buffer);
 
@@ -69,7 +69,7 @@ SensorSimulator::SensorSimulator()
       device_classification.empty() || sensor_name.empty() || sensor_source_type.empty() || sensor_unit.empty())
   {
     RCLCPP_ERROR_STREAM(node->get_logger(), "Invalid empty parameter, please check input parameters!");
-    return;
+    // return;
   }
 
   // update parameters
@@ -77,12 +77,13 @@ SensorSimulator::SensorSimulator()
   {
 
     RCLCPP_ERROR_STREAM(node->get_logger(), "Could not update source descriptions!");
-    return;
+    // return;
   }
   // initialize publishers
 
   measurement_pub = node->create_publisher<fkie_measurement_msgs::msg::Measurement>(topic_measurement, 10);
-  measurement_array_pub = node->create_publisher<fkie_measurement_msgs::msg::MeasurementArray>(topic_measurement + "_array", 10);
+  measurement_array_pub = node->create_publisher<fkie_measurement_msgs::msg::MeasurementArray>(topic_measurement_array, 10);
+  sensor_array_pub = node->create_publisher<fkie_measurement_msgs::msg::MeasurementArray>(topic_sensor_array, 10);
   marker_location_pub = node->create_publisher<visualization_msgs::msg::MarkerArray>("sensor_locations", 10);
   publishSourceLocations();
   spin();
@@ -92,6 +93,7 @@ SensorSimulator::~SensorSimulator()
 {
   measurement_pub.reset();
   measurement_array_pub.reset();
+  sensor_array_pub.reset();
   marker_location_pub.reset();
 }
 
@@ -102,11 +104,9 @@ void SensorSimulator::spin()
   {
     // Get current sensor position
     updateCurrentSensorPosition();
-    RCLCPP_INFO_STREAM(node->get_logger(), "sensor_position: " << current_sensor_position.toString());
 
     // compute accumulated_intensity from all
     double accumulated_intensity = computeMeasurementFromSources();
-    RCLCPP_INFO_STREAM(node->get_logger(), "accumulated_intensity: " << accumulated_intensity);
 
     // publish message
     publishMeasurement(accumulated_intensity);
@@ -250,6 +250,10 @@ void SensorSimulator::publishSourceLocations()
   m.lifetime = rclcpp::Duration::from_nanoseconds(0);
   m.pose.orientation.w = 1.0;
 
+  fkie_measurement_msgs::msg::MeasurementArray m_array;
+  m_array.header.stamp = rclcpp::Clock().now();
+  m_array.full_history = true;
+
   int counter_id = 1;
   for (SourceDescription s : sources)
   {
@@ -306,9 +310,41 @@ void SensorSimulator::publishSourceLocations()
 
     m_line.color = s.color_text;
     marker_locations.markers.push_back(m_line);
+
+    // create measurement array
+    fkie_measurement_msgs::msg::MeasurementLocated m_located;
+    m_located.measurement.header.frame_id = global_frame;
+    m_located.measurement.header.stamp = rclcpp::Clock().now();
+    // Unique ID that identifies the device
+    m_located.measurement.unique_serial_id = s.name;
+    // Generic name assigned by the device manufacturer
+    m_located.measurement.manufacturer_device_name = s.name;
+    // classification that groups what the device is able to measure:
+    //   e.g. chemical (C), biological (B), radiological (R), meteorologic (M), (W) WiFi etc...
+    m_located.measurement.device_classification = device_classification;
+
+    fkie_measurement_msgs::msg::MeasurementValue v;
+    v.begin = rclcpp::Clock().now();
+    v.end = v.begin;
+    v.sensor = s.name;
+    v.source_type = sensor_source_type;
+    v.unit = sensor_unit;
+    v.value_single = s.intensity;
+    m_located.measurement.values.push_back(v);
+
+    // publish measurement array
+    m_located.pose.header.frame_id = global_frame;
+    m_located.pose.header.stamp = rclcpp::Clock().now();
+    m_located.pose.pose.position.x = s.position.x;
+    m_located.pose.pose.position.y = s.position.y;
+    m_located.pose.pose.position.z = s.position.z + marker_size;
+    m_located.utm_zone_number = utm_zone_number;
+    m_located.utm_zone_letter = utm_zone_letter;
+    m_array.located_measurements.push_back(m_located);
   }
   marker_locations.markers.push_back(m);
   marker_location_pub->publish(marker_locations);
+  sensor_array_pub->publish(m_array);
 }
 
 double SensorSimulator::euclideanDistance(const PositionGrid &p1, const PositionGrid &p2) const

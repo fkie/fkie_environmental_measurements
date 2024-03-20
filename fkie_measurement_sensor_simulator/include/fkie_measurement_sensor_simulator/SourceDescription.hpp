@@ -45,43 +45,38 @@ public:
   {
     sources.clear();
     int counter = 0;
-    for (int i = 0; i < 1; i++)//4
+    bool valid = true;
+    while (valid)
     {
-      std::string param_name = "sources/source_" + std::to_string(i);
-      RCLCPP_WARN_STREAM(node->get_logger(), "param_name: " << param_name);
+      std::string param_name = "sources/source_" + std::to_string(counter);
+      RCLCPP_INFO_STREAM(node->get_logger(), "check for source: " << param_name);
       SourceDescription sd;
       std::vector<double> color_rgba;
-      bool valid = false;
-      node->declare_parameter(param_name + "/valid", valid);
-      valid = node->get_parameter(param_name + "/valid").as_bool();
-      
-
       node->declare_parameter(param_name + "/name", sd.name);
       node->declare_parameter(param_name + "/intensity", sd.intensity);
       node->declare_parameter(param_name + "/x", sd.position.x);
       node->declare_parameter(param_name + "/y", sd.position.y);
       node->declare_parameter(param_name + "/z", sd.position.z);
-
       node->declare_parameter(param_name + "/function", sd.function);
       node->declare_parameter(param_name + "/linear_alpha", sd.linear_alpha);
       node->declare_parameter(param_name + "/exponential_decay_rate", sd.exponential_decay_rate);
-
       node->declare_parameter<std::vector<double>>(param_name + "/color_rgba", color_rgba);
+      node->declare_parameter(param_name + "/text_color_rgba", color_rgba);
 
-      // Simulator properties
       sd.name = node->get_parameter(param_name + "/name").as_string();
-      sd.intensity = node->get_parameter(param_name + "/intensity").as_double();
-      sd.position.x = node->get_parameter(param_name + "/x").as_double();
-      sd.position.y = node->get_parameter(param_name + "/y").as_double();
-      sd.position.z = node->get_parameter(param_name + "/z").as_double();
-
-      sd.function = node->get_parameter(param_name + "/function").as_string();
-      sd.linear_alpha = node->get_parameter(param_name + "/linear_alpha").as_double();
-      sd.exponential_decay_rate = node->get_parameter(param_name + "/exponential_decay_rate").as_double();
-
-      color_rgba = node->get_parameter(param_name + "/color_rgba").as_double_array();
-      if (valid)
+      // Simulator properties
+      if (!sd.name.empty())
       {
+        sd.intensity = node->get_parameter(param_name + "/intensity").as_double();
+        sd.position.x = node->get_parameter(param_name + "/x").as_double();
+        sd.position.y = node->get_parameter(param_name + "/y").as_double();
+        sd.position.z = node->get_parameter(param_name + "/z").as_double();
+
+        sd.function = node->get_parameter(param_name + "/function").as_string();
+        sd.linear_alpha = node->get_parameter(param_name + "/linear_alpha").as_double();
+        sd.exponential_decay_rate = node->get_parameter(param_name + "/exponential_decay_rate").as_double();
+
+        color_rgba = node->get_parameter(param_name + "/color_rgba").as_double_array();
         if (color_rgba.size() > 0)
         {
           sd.color.r = color_rgba[0];
@@ -90,9 +85,7 @@ public:
           sd.color.a = color_rgba[3];
         }
 
-        node->declare_parameter(param_name + "/text_color_rgba", color_rgba);
         color_rgba = node->get_parameter(param_name + "/text_color_rgba").as_double_array();
-
 
         if (color_rgba.size() > 0)
         {
@@ -104,15 +97,13 @@ public:
 
         sources.push_back(sd);
         counter++;
+      } else {
+        valid = false;
       }
     }
 
-    if (counter == 0) // no parameters were found
-      return false;
-
     RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "Total sources: " << sources.size());
-
-    return true;
+    return (counter > 0);
   }
 };
 

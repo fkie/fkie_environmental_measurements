@@ -65,6 +65,7 @@ protected:
   std::unique_ptr<tf2_ros::Buffer> p_tf_buffer;
   rclcpp::Publisher<fkie_measurement_msgs::msg::Measurement>::SharedPtr measurement_pub;
   rclcpp::Publisher<fkie_measurement_msgs::msg::MeasurementArray>::SharedPtr measurement_array_pub;
+  rclcpp::Publisher<fkie_measurement_msgs::msg::MeasurementArray>::SharedPtr sensor_array_pub;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_location_pub;
   visualization_msgs::msg::MarkerArray marker_locations;
 

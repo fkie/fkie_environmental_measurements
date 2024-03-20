@@ -3,10 +3,8 @@
   <arg name="sensor_frame" default="sensor_frame"/>
 
   <node name="sensor_simulator" pkg="fkie_measurement_sensor_simulator" exec="sensor-simulator">
-    <param name="capability_group" value="sensor_simulator"/>
-
     <param from="$(find-pkg-share fkie_measurement_sensor_simulator)/config/sensor_simulator_config.yaml" />
-    <param name="sources/source_0/valid" value="true"/>
+    <!-- <param name="sources/source_0/valid" value="true"/>
     <param name="sources/source_0/name" value="hot-spot 1"/>
     <param name="sources/source_0/intensity" value="10.0"/>
     <param name="sources/source_0/x" value="1.0"/>
@@ -14,7 +12,7 @@
     <param name="sources/source_0/z" value="1.0"/>  
     <param name="sources/source_0/function" value="linear"/>  
     <param name="sources/source_0/color_rgba" value="[0.0, 0.7, 0.0, 0.8]"/>  
-    <param name="sources/source_0/text_color_rgba" value="[0.8, 0.8, 0.8, 0.8]"/>  
+    <param name="sources/source_0/text_color_rgba" value="[0.8, 0.8, 0.8, 0.8]"/>   -->
     
     
     <param name="global_frame" value="$(var global_frame)"/>
@@ -30,10 +28,13 @@
     <param name="sensor_name" value="sensor_1"/>
     <param name="sensor_source_type" value="temperature"/>
     <param name="sensor_unit" value="C"/>
+
+    <param name="utm_zone_number" value="32"/>
+    <param name="utm_zone_letter" value="U"/>
+    <param name="random_pos_factor" value="2.5"/>
   </node>
 
-  <node name="tf_world_sensor_frame" pkg="tf2_ros" exec="static_transform_publisher" args="1.0 0.5 0.6 0 0 0 $(var global_frame) $(var sensor_frame)">
-    <param name="capability_group" value="sensor_simulator"/>
+  <node name="tf_world_sensor_frame" pkg="tf2_ros" exec="static_transform_publisher" args="367260.37 5609547.24 255 0 0 0 $(var global_frame) $(var sensor_frame)">
   </node>
 
   <!--<node name="rviz_sensor_simulator" pkg="rviz2" exec="rviz2" output="screen" args="-d $(find-pkg-share fkie_measurement_sensor_simulator)/config/sensor_simulator.rviz">
