@@ -65,7 +65,6 @@ SensorSimulator::SensorSimulator()
   utm_zone_number = node->get_parameter("utm_zone_number").as_int();
   utm_zone_letter = node->get_parameter("utm_zone_letter").as_string();
 
-
   if (global_frame.empty() || sensor_frame.empty() || unique_serial_id.empty() || manufacturer_device_name.empty() ||
       device_classification.empty() || sensor_name.empty() || sensor_source_type.empty() || sensor_unit.empty())
   {
@@ -87,7 +86,6 @@ SensorSimulator::SensorSimulator()
   marker_location_pub = node->create_publisher<visualization_msgs::msg::MarkerArray>("sensor_locations", 10);
   publishSourceLocations();
   spin();
-  
 }
 
 SensorSimulator::~SensorSimulator()
@@ -106,13 +104,12 @@ void SensorSimulator::spin()
     updateCurrentSensorPosition();
     RCLCPP_INFO_STREAM(node->get_logger(), "sensor_position: " << current_sensor_position.toString());
 
-    // compute accumulated_intensity from all 
+    // compute accumulated_intensity from all
     double accumulated_intensity = computeMeasurementFromSources();
     RCLCPP_INFO_STREAM(node->get_logger(), "accumulated_intensity: " << accumulated_intensity);
 
     // publish message
     publishMeasurement(accumulated_intensity);
-    
 
     rclcpp::spin_some(node);
     loop_rate.sleep();
@@ -134,30 +131,29 @@ void SensorSimulator::updateCurrentSensorPosition()
     RCLCPP_WARN_THROTTLE(node->get_logger(), steady_clock, 10000, "Could not lookup transform from %s to %s: %s", global_frame.c_str(), sensor_frame.c_str(), ex.what());
   }
 
-
   rclcpp::Time time_zero;
   auto tf_world_sensor = p_tf_buffer->lookupTransform(global_frame, sensor_frame, time_zero);
 
   // convert point to world frame
   if (random_pos_factor != 0.0)
   {
-    float rfactor = static_cast<float>(rand()) / static_cast<float>(RAND_MAX / random_pos_factor);
-    xpos += rfactor * xdir;
-    if (rfactor < random_pos_factor / 10.0)
+    float rFactor = static_cast<float>(rand()) / static_cast<float>(RAND_MAX / random_pos_factor);
+    xPos += rFactor * xDir;
+    if (rFactor < random_pos_factor / 10.0)
     {
-      xdir *= -1.0;
+      xDir *= -1.0;
     }
   }
   if (random_pos_factor != 0.0)
   {
-    float rfactor = static_cast<float>(rand()) / static_cast<float>(RAND_MAX / random_pos_factor);
-    ypos += rfactor * ydir;
-    if (rfactor < random_pos_factor / 10.0)
+    float rFactor = static_cast<float>(rand()) / static_cast<float>(RAND_MAX / random_pos_factor);
+    yPos += rFactor * yDir;
+    if (rFactor < random_pos_factor / 10.0)
     {
-      ydir *= -1.0;
+      yDir *= -1.0;
     }
-
-  current_sensor_position = PositionGrid(tf_world_sensor.transform.translation.x + xdir, tf_world_sensor.transform.translation.y + ydir, tf_world_sensor.transform.translation.z);
+  }
+  current_sensor_position = PositionGrid(tf_world_sensor.transform.translation.x + xDir, tf_world_sensor.transform.translation.y + yDir, tf_world_sensor.transform.translation.z);
 }
 
 double SensorSimulator::computeMeasurementFromSources() const
